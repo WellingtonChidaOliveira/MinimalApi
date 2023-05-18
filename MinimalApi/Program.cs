@@ -1,4 +1,3 @@
-using Application.Abstractions;
 using Application.UseCases.Delete;
 using Application.UseCases.GetAllPosts;
 using Application.UseCases.GetPostById;
@@ -6,16 +5,10 @@ using Application.UseCases.Posts;
 using Application.UseCases.UpdatePost;
 using Domain.Models;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Persistence;
-using Persistence.Repositories;
+using MinimalApi.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<SocialDbContext>(options => options.UseSqlServer(connectionString));
-builder.Services.AddScoped<IPostRepository, PostRepository>();
-builder.Services.AddMediatR(typeof(CreatePostCommand));
+builder.RegisterServices();
 // Add services to the container.
 
 var app = builder.Build();
