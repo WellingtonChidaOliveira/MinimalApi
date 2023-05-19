@@ -14,7 +14,9 @@ namespace MinimalApi.EndpointDefinitions
     {
         public void DefineEndpoints(WebApplication app)
         {
-            app.MapGet("/api/posts/{id}", async (IMediator mediator, int id) =>
+            var posts = app.MapGroup("api/posts");
+
+            posts.MapGet("/{id}", async (IMediator mediator, int id) =>
             {
                 var getPost = new GetPostByIdCommand { Id = id };
                 var post = await mediator.Send(getPost);
@@ -24,7 +26,7 @@ namespace MinimalApi.EndpointDefinitions
                 .WithName("GetPostById");
 
 
-            app.MapPost("/api/posts", async ([FromServices] IMediator mediator, Post command) =>
+            posts.MapPost("/", async ([FromServices] IMediator mediator, Post command) =>
             {
                 var createPost = new CreatePostCommand { Content = command.Content };
                 var post = await mediator.Send(createPost);
@@ -32,7 +34,7 @@ namespace MinimalApi.EndpointDefinitions
             })
                 .WithName("CreatePost");
 
-            app.MapGet("/api/posts/getAll", async (IMediator mediator) =>
+            posts.MapGet("/getAll", async (IMediator mediator) =>
             {
                 var getAllPosts = new GetAllPostsCommand();
                 var posts = await mediator.Send(getAllPosts);
@@ -41,7 +43,7 @@ namespace MinimalApi.EndpointDefinitions
             })
                 .WithName("GetAllPosts");
 
-            app.MapPut("/api/posts/{id}", async ([FromServices] IMediator mediator, Post post, int id) =>
+            posts.MapPut("/{id}", async ([FromServices] IMediator mediator, Post post, int id) =>
             {
                 var updatePost = new UpdatePostCommand { Id = id, Content = post.Content };
                 var newPost = await mediator.Send(updatePost);
@@ -49,7 +51,7 @@ namespace MinimalApi.EndpointDefinitions
             })
                 .WithName("UpdatePost");
 
-            app.MapDelete("/api/posts/{id}", async (IMediator mediator, int id) =>
+            posts.MapDelete("/{id}", async (IMediator mediator, int id) =>
             {
                 var deletePost = new DeletePostCommand { Id = id };
                 await mediator.Send(deletePost);
