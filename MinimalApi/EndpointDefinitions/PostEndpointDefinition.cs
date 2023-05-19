@@ -16,48 +16,57 @@ namespace MinimalApi.EndpointDefinitions
         {
             var posts = app.MapGroup("api/posts");
 
-            posts.MapGet("/{id}", async (IMediator mediator, int id) =>
-            {
-                var getPost = new GetPostByIdCommand { Id = id };
-                var post = await mediator.Send(getPost);
-                if (post is null) return Results.NotFound();
-                return Results.Ok(post);
-            })
+            posts.MapGet("/{id}", GetPostById)
                 .WithName("GetPostById");
 
-
-            posts.MapPost("/", async ([FromServices] IMediator mediator, Post command) =>
-            {
-                var createPost = new CreatePostCommand { Content = command.Content };
-                var post = await mediator.Send(createPost);
-                return Results.CreatedAtRoute("GetPostById", new { id = post.Id }, post);
-            })
+            posts.MapPost("/", CreatePost)
                 .WithName("CreatePost");
 
-            posts.MapGet("/getAll", async (IMediator mediator) =>
-            {
-                var getAllPosts = new GetAllPostsCommand();
-                var posts = await mediator.Send(getAllPosts);
-                return Results.Ok(posts);
-
-            })
+            posts.MapGet("/getAll", GetAllPosts)
                 .WithName("GetAllPosts");
 
-            posts.MapPut("/{id}", async ([FromServices] IMediator mediator, Post post, int id) =>
-            {
-                var updatePost = new UpdatePostCommand { Id = id, Content = post.Content };
-                var newPost = await mediator.Send(updatePost);
-                return Results.Ok(newPost);
-            })
+            posts.MapPut("/{id}", UpdatePost)
                 .WithName("UpdatePost");
 
-            posts.MapDelete("/{id}", async (IMediator mediator, int id) =>
-            {
-                var deletePost = new DeletePostCommand { Id = id };
-                await mediator.Send(deletePost);
-                return Results.NoContent();
-            })
+            posts.MapDelete("/{id}", DeletePost)
                 .WithName("DeletePost");
+        }
+
+
+        private async Task<IResult> GetPostById(IMediator mediator, int id)
+        {
+            var getPost = new GetPostByIdCommand { Id = id };
+            var post = await mediator.Send(getPost);
+            if (post is null) return Results.NotFound();
+            return TypedResults.Ok(post);
+        }
+
+        private async Task<IResult> CreatePost(IMediator mediator, Post command)
+        {
+            var createPost = new CreatePostCommand { Content = command.Content };
+            var post = await mediator.Send(createPost);
+            return Results.CreatedAtRoute("GetPostById", new { id = post.Id }, post);
+        }
+
+        private async Task<IResult> GetAllPosts(IMediator mediator)
+        {
+            var getAllPosts = new GetAllPostsCommand();
+            var posts = await mediator.Send(getAllPosts);
+            return TypedResults.Ok(posts);
+        }
+
+        private async Task<IResult> UpdatePost(IMediator mediator, Post post, int id)
+        {
+            var updatePost = new UpdatePostCommand { Id = id, Content = post.Content };
+            var newPost = await mediator.Send(updatePost);
+            return TypedResults.Ok(newPost);
+        }
+
+        private async Task<IResult> DeletePost(IMediator mediator, int id)
+        {
+            var deletePost = new DeletePostCommand { Id = id };
+            await mediator.Send(deletePost);
+            return TypedResults.NoContent();
         }
     }
 }
