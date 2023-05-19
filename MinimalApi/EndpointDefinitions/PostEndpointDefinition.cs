@@ -7,6 +7,7 @@ using Domain.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MinimalApi.Abstractions;
+using MinimalApi.Filters;
 
 namespace MinimalApi.EndpointDefinitions
 {
@@ -19,17 +20,16 @@ namespace MinimalApi.EndpointDefinitions
             posts.MapGet("/{id}", GetPostById)
                 .WithName("GetPostById");
 
-            posts.MapPost("/", CreatePost)
-                .WithName("CreatePost");
+            posts.MapPost("/create", CreatePost)
+                .AddEndpointFilter<PostValidationFilter>();
 
-            posts.MapGet("/getAll", GetAllPosts)
-                .WithName("GetAllPosts");
+            posts.MapGet("/getAll", GetAllPosts);
 
             posts.MapPut("/{id}", UpdatePost)
-                .WithName("UpdatePost");
+                .AddEndpointFilter<PostValidationFilter>();
 
-            posts.MapDelete("/{id}", DeletePost)
-                .WithName("DeletePost");
+            posts.MapDelete("/{id}", DeletePost);
+
         }
 
 
@@ -45,7 +45,7 @@ namespace MinimalApi.EndpointDefinitions
         {
             var createPost = new CreatePostCommand { Content = command.Content };
             var post = await mediator.Send(createPost);
-            return Results.CreatedAtRoute("GetPostById", new { id = post.Id }, post);
+            return Results.CreatedAtRoute("GetPostById", new { post.Id }, post);
         }
 
         private async Task<IResult> GetAllPosts(IMediator mediator)

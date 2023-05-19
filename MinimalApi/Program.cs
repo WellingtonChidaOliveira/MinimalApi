@@ -7,7 +7,20 @@ builder.RegisterServices();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.Use(async (context, next) =>
+{
+	try
+	{
+		await next();
 
+	}
+	catch (Exception ex)
+	{
+		context.Response.StatusCode = 500;
+		await context.Response.WriteAsJsonAsync(new { Message = $"Something went wrong: {ex.Message}" });
+	}
+
+});
 app.UseHttpsRedirection();
 
 app.RegisterEndpointDefinitions();
